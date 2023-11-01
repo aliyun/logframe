@@ -10,6 +10,7 @@ import six
 import json
 import locale
 import requests
+import time
 API_VERSION ='0.6.0'
 class LogClient(object):
     @staticmethod
@@ -40,11 +41,15 @@ class LogClient(object):
         offset = 0
         lines = 100
         dfList = []
+        startExeTime = (int)(time.time())
         while True:
             tmpRes = self.getLogs(project,logstore,fromTime,toTime,query,keys,timeoutSec, False, offset, lines)
             if len(tmpRes) ==0:
                 break
             dfList.append(tmpRes)
+            offset += lines
+            if (int)(time.time()) - startExeTime > timeoutSec:
+                break
         return pd.concat(dfList)
     def getLogs(self,project=None, logstore=None,fromTime=None, toTime=None,query='',keys=[], timeoutSec=60, fullData=False,offset=0,lines=100):
         if fullData:
